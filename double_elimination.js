@@ -5,6 +5,7 @@ class Player {
 	this.losses = losses;
   }
 }
+
 function addPlayer() {
 	var playerName = document.getElementById("playerName").value;
 	if (!playerName) return;
@@ -13,16 +14,16 @@ function addPlayer() {
 	$("#playerList").append(playerName + ', ');
 }
 
+function shuffle(array) {
+  array.sort(() => Math.random() - 0.5);
+}
+
 var matches = [];
 class Match {
   constructor() {
 	this.players = [];
 	this.isPlayed = false;
   }
-}
-
-function shuffle(array) {
-  array.sort(() => Math.random() - 0.5);
 }
 
 function setMatchType(matchIndex, matchType) {
@@ -42,23 +43,6 @@ function makeBtn(name, matchIndex, playerIndex) {
 	$("#match_" + matchIndex).append(btn);		
 }
 
-function initTour() {
-	shuffle(players);
-	var playerCount = players.length;
-	var matchCount = 2 * playerCount - 1;
-	for (var m = 0; m < matchCount; m++) {
-		matches[m] = new Match();
-		$("#matches").append('<div id="match_' + m + '" class="notPlayed">#' + m + '&nbsp;</div>');
-	}
-	m = 0; var playerIndex = 0;
-	for (var p = 0; p < playerCount; p++) {
-		if (playerIndex == 0) setMatchType(m, true);
-		matches[m].players[playerIndex] = players[p];
-		makeBtn(players[p].name, m, playerIndex);
-		playerIndex++; if (playerIndex == 2) {playerIndex = 0; m++;}
-	}
-}
-
 function isFreePlace(matchIndex){
 	var isFree = !matches[matchIndex].players[0] || !matches[matchIndex].players[1];
 	return isFree;
@@ -70,6 +54,31 @@ function howManyAlive() {
 		if (players[i].losses < 2) counter++;
 	}
 	return counter;
+}
+
+function initTour() {
+	shuffle(players);
+	var playerCount = players.length;
+	var matchCount = 2 * playerCount - 1;
+	for (var m = 0; m < matchCount; m++) {
+		if (matches[m] == undefined) {
+			matches[m] = new Match();
+			$("#matches").append('<div id="match_' + m + '" class="notPlayed">#' + m + '&nbsp;</div>');
+		}
+	}
+	for (var p = 0; p < playerCount; p++) {
+		for (var m = 0; m < matches.length; m++) {
+			if (isFreePlace(m)) {
+				var playerIndex = matches[m].players[0] == undefined ? 0 : 1;
+				if (players[p].inMatch == undefined) {
+					if (playerIndex == 0) setMatchType(m, true);
+					matches[m].players[playerIndex] = players[p];
+					players[p].inMatch = true;
+					makeBtn(players[p].name, m, playerIndex);
+				}
+			}
+		}
+	}
 }
 
 function playMatch(matchIndex, winnerIndex) {
