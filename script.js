@@ -1,3 +1,10 @@
+$(function (){
+	$('body').append('<div id="adding">[<input id="playerName" type="text" value="" placeholder="new player..." />]'
+	+'<button onclick="initTour()">[ add ]</button></div>'
+	+'<div id="matches"></div>'
+	+'<div id="summary"></div>');
+});
+
 var players = []; var matches = [];
 class Player {
 	constructor(name) {
@@ -101,7 +108,7 @@ var playMatch = function(matchIndex, winnerIndex) {
 	var loserIndex = winnerIndex == 0 ? 1 : 0;
 	var loser = matches[matchIndex].players[loserIndex];
 	winner.played++; loser.played++; loser.losses++;
-	$("#btn_" + matchIndex + '_' + loserIndex).addClass("loser");
+	$("#btn_" + matchIndex + '_' + loserIndex).addClass((loser.losses < 2) ? "loser" : "dropout");
 	$(".wasPlayed > button").off('click');
 	var newLoserPlace; var newWinnerPlace;
 	if (howManyAlive() < 2) { // viewResults
@@ -131,8 +138,8 @@ var rePlay = function(matchIndex, winnerIndex, winner, newWinnerPlace, loserInde
 	$("#summary").html("").hide();
 	loser.losses--; winner.losses++;
 	if (howManyAlive() < 2) { // viewResults
-		$("#btn_" + matchIndex + '_' + winnerIndex).removeClass("totalwinner").removeClass("winner").addClass("loser");
-		$("#btn_" + matchIndex + '_' + loserIndex).removeClass("loser").addClass("totalwinner");
+		$("#btn_" + matchIndex + '_' + winnerIndex).removeClass("totalwinner").removeClass("winner").addClass((winner.losses < 2) ? "loser" : "dropout");
+		$("#btn_" + matchIndex + '_' + loserIndex).removeClass("dropout").removeClass("loser").addClass("totalwinner");
 		if (newLoserPlace != undefined) {
 			$("#btn_" + newLoserPlace[0] + '_' + newLoserPlace[1]).remove();
 			$("#btn_" + newWinnerPlace[0] + '_' + newWinnerPlace[1]).remove();
@@ -140,8 +147,8 @@ var rePlay = function(matchIndex, winnerIndex, winner, newWinnerPlace, loserInde
 		} viewResults(loser, winner);
 	} else {
 		$("#adding").show();
-		$("#btn_" + matchIndex + '_' + winnerIndex).removeClass("totalwinner").removeClass("winner").addClass("loser");
-		$("#btn_" + matchIndex + '_' + loserIndex).removeClass("loser").addClass("winner");
+		$("#btn_" + matchIndex + '_' + winnerIndex).removeClass("totalwinner").removeClass("winner").addClass((winner.losses < 2) ? "loser" : "dropout");
+		$("#btn_" + matchIndex + '_' + loserIndex).removeClass("dropout").removeClass("loser").addClass("winner");
 		if (howManyAlive() < 3) $("#match_" + (matches.length-1)).removeClass("wasPlayed");
 		if (newWinnerPlace == undefined) {
 			if (newLoserPlace == undefined) {
